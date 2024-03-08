@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalitySync - Scheduling and Communication</title>
+    <style>
+        /* CSS Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f6f6; /* Light dark green */
+            color: #333; /* Dark text color */
+        }
+        
+        header {
+            background-color: #1b9aaa; /* Dark green */
+            color: #fff; /* White text color */
+            padding: 20px;
+            text-align: center;
+        }
+        
+        main {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        section {
+            margin-bottom: 20px;
+            background-color: #fff; /* White background */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
+            width: 400px;
+        }
+        
+        h1, h2 {
+            margin-bottom: 10px;
+            color: #1b9aaa; /* Dark green */
+        }
+        
+        .medmate-text {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+        
+        label {
+            margin-bottom: 5px;
+            color: #1b9aaa; /* Dark green */
+        }
+        
+        input[type="date"],
+        input[type="time"],
+        input[type="tel"],
+        input[type="email"],
+        textarea,
+        select {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc; /* Light gray border */
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #1b9aaa; /* Dark green */
+            color: #fff; /* White text color */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        #messages {
+            margin-top: 10px;
+            border: 1px solid #ccc; /* Light gray border */
+            border-radius: 5px;
+            padding: 10px;
+            min-height: 100px;
+            overflow-y: auto;
+        }
+        
+        footer {
+            background-color: #1b9aaa; /* Dark green */
+            color: #fff; /* White text color */
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="medmate-text">MedMate</h1> <!-- MedMate text -->
+    </header>
+    <main>
+        <section id="schedule">
+            <h2>Schedule Appointment</h2>
+            <form id="appointment-form">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+                <label for="time">Time:</label>
+                <input type="time" id="time" name="time" required>
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email">
+                <label for="communication">Preferred Communication Method:</label>
+                <select id="communication" name="communication">
+                    <option value="email">Email</option>
+                    <option value="text">Text Message</option>
+                    <option value="both">Both</option>
+                </select>
+                <button type="submit">Schedule</button>
+            </form>
+        </section>
+        <section id="communication">
+            <h2>Communication</h2>
+            <textarea id="message" rows="4" placeholder="Type your message here..."></textarea>
+            <button id="send">Send</button>
+            <div id="messages"></div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 VitalitySync Inc.</p> <!-- VitalitySync app name -->
+    </footer>
+    <script>
+        const appointmentForm = document.getElementById('appointment-form');
+        const messageTextarea = document.getElementById('message');
+        const messagesDiv = document.getElementById('messages');
+
+        appointmentForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            const communicationMethod = document.getElementById('communication').value;
+            let confirmationMessage = 'Appointment Scheduled:\nDate: ' + date + '\nTime: ' + time;
+            
+            if (communicationMethod === 'email' || communicationMethod === 'both') {
+                confirmationMessage += '\nEmail Confirmation sent to: ' + email;
+                // Code to send email confirmation
+                sendEmailConfirmation(email, confirmationMessage);
+            }
+            
+            if (communicationMethod === 'text' || communicationMethod === 'both') {
+                confirmationMessage += '\nText Message Confirmation sent to: ' + phone;
+                // Code to send text message confirmation
+                sendTextMessageConfirmation(phone, confirmationMessage);
+            }
+            
+            alert(confirmationMessage);
+        });
+
+        document.getElementById('send').addEventListener('click', function() {
+            const message = messageTextarea.value.trim();
+            const communicationMethod = document.getElementById('communication').value;
+            let confirmationMessage = '';
+
+            if (message !== '') {
+                const messageElement = document.createElement('p');
+                messageElement.textContent = message;
+                messagesDiv.appendChild(messageElement);
+                messageTextarea.value = '';
+
+                if (communicationMethod === 'email' || communicationMethod === 'both') {
+                    confirmationMessage += 'Email Sent with Message: ' + message;
+                    // Code to send email with message
+                    sendEmail(document.getElementById('email').value, message);
+                }
+                
+                if (communicationMethod === 'text' || communicationMethod === 'both') {
+                    confirmationMessage += '\nText Message Sent with Message: ' + message;
+                    // Code to send text message with message
+                    sendTextMessage(document.getElementById('phone').value, message);
+                }
+                
+                alert(confirmationMessage);
+            } else {
+                alert('Please enter a message to send.');
+            }
+        });
+
+        function sendEmailConfirmation(email, message) {
+            // Code to send email confirmation
+            console.log('Email confirmation sent to: ' + email);
+            console.log('Message: ' + message);
+        }
+
+        function sendTextMessageConfirmation(phone, message) {
+            // Code to send text message confirmation
+            console.log('Text message confirmation sent to: ' + phone);
+            console.log('Message: ' + message);
+        }
+
+        function sendEmail(email, message) {
+            // Code to send email with message
+            console.log('Email sent to: ' + email);
+            console.log('Message: ' + message);
+        }
+
+        function sendTextMessage(phone, message) {
+            // Code to send text message with message
+            console.log('Text message sent to: ' + phone);
+            console.log('Message: ' + message);
+        }
+    </script>
+</body>
+</html>
